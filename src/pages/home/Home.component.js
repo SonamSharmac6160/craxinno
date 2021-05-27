@@ -7,7 +7,7 @@ import { Field, reduxForm } from "redux-form";
 import { required } from "../../constants/validation";
 
 import { Nav, Footer, LoaderScreen } from "../includes";
-import { setLoader } from "../../actions";
+import { setLoader, getInitialData } from "../../actions";
 import Plot from 'react-plotly.js';
 
 
@@ -38,6 +38,8 @@ class Home extends Component<Props> {
     a = JSON.parse(localStorage.getItem('userData')) || [];
     a.push(formValue.balance);
     localStorage.setItem('userData', JSON.stringify(a));
+    this.props.reset('accountForm');
+    // this.props.getInitialData(this.props.tempData, "");
   }
 
   render() {
@@ -59,12 +61,14 @@ class Home extends Component<Props> {
     let indexBal = []
     var xAxis = sumOfBalance
     for (var i = 0; i < sumOfBalance; i++) {
-      if (i == 0) { balanceArr.push(xAxis)
-      indexBal.push(i) }
+      if (i == 0) {
+        balanceArr.push(xAxis)
+        indexBal.push(i)
+      }
       xAxis = xAxis - Number(this.state.monthly_payment)
       if (xAxis >= 0) {
         balanceArr.push(xAxis)
-        indexBal.push(i+1)
+        indexBal.push(i + 1)
       }
     }
 
@@ -97,62 +101,76 @@ class Home extends Component<Props> {
 
 
                       <div className="card-body">
-                        <div className="pb-3"><h2 className="card-h2">Initial Balance: {sumOfBalance}</h2></div><div className="pb-3"><h2 className="card-h2">Count: {getBalnace.length}</h2></div>
-                        <label className="balnace">Monthly Payment:</label>
-                        <Field name="monthly_payment" type="text" id="monthly_payment" placeholder={`Monthly Payment`} component={renderInput} onChange={this.handleChange} />
+                        <div className="pb-3"><h2 className="card-h2">Initial Balance: {sumOfBalance}</h2></div>
+                        <div className="pb-3"><h2 className="card-h2">Count: {getBalnace.length}</h2></div>
 
-                        {getBalnace.map((person, index) => (
-                          <p><span className="balnace">Balance: {Number(person)}</span><br /></p>
-                        ))}
 
-                        <form
-                          name="addUserForm"
-                          onSubmit={this.props.handleSubmit(this.onSubmit)}
-                          className="form"
-                        >
-                          <div className="row justify-content-center">
-                            <div className="col-md-12">
-                              <label className="balnace">Balance:</label>
-                              <Field name="balance" type="text" id="balance" placeholder={`Balance`} component={renderInput} onChange={this.handleChange} validate={required} />
-                            </div>
 
-                            <div className="col-md-4 pt-2">
-                              <button type="submit" className="btn btn-block btn-red mb-2"><span className="glyphicon glyphicon-off"></span>Submit</button>
-                            </div>
+
+                        <div className="row">
+                          <div className="col-md-4">
+                            {getBalnace.map((person, index) => (
+                              <p key={index}><span className="balnace"><h6>Balance: {Number(person)}</h6></span><br /></p>
+                            ))}
                           </div>
-                        </form>
-                        <Plot
-                          data={data}
-                          style={{ width: '100%', height: '100%' }}
-                          useResizeHandler
-                          layout={{
-                            autosize: true,
-                            showlegend: true,
-                            margin: { t: 50 },
-                            hovermode: 'closest',
-                            bargap: 0,
-                            xaxis: {
-                              domain: [0, 0.85],
-                              showgrid: false,
-                              zeroline: false
-                            },
-                            yaxis: {
-                              domain: [0, 0.85],
-                              showgrid: false,
-                              zeroline: false
-                            },
-                            xaxis2: {
-                              domain: [0.85, 1],
-                              showgrid: false,
-                              zeroline: false
-                            },
-                            yaxis2: {
-                              domain: [0.85, 1],
-                              showgrid: false,
-                              zeroline: false
-                            }
-                          }}
-                        />
+                          <div className="col-md-4">
+                            <label className="balnace">Monthly Payment:</label>
+                            <Field name="monthly_payment" type="text" id="monthly_payment" placeholder={`Monthly Payment`} component={renderInput} onChange={this.handleChange} />
+                          </div>
+                          <div className="col-md-4">
+
+                            <form
+                              name="accountForm"
+                              onSubmit={this.props.handleSubmit(this.onSubmit)}
+                              className="form"
+                            >
+                              <div className="row justify-content-center">
+                                <div className="col-md-8">
+                                  <label className="balnace">Balance:</label>
+                                  <Field name="balance" type="text" id="balance" placeholder={`Balance`} component={renderInput} onChange={this.handleChange} validate={required} />
+                                </div>
+
+                                <div className="col-md-4 pt-4">
+                                  <button type="submit" className="btn btn-block btn-red mb-2"><span className="glyphicon glyphicon-off"></span>Submit</button>
+                                </div>
+                              </div>
+                            </form>
+                          </div>
+
+                          <div className="pb-3 pt-3"><h3 className="card-h2">Balance of accounts after a number of months</h3></div>
+                          <Plot
+                            data={data}
+                            style={{ width: '100%', height: '100%' }}
+                            useResizeHandler
+                            layout={{
+                              autosize: true,
+                              showlegend: true,
+                              margin: { t: 50 },
+                              hovermode: 'closest',
+                              bargap: 0,
+                              xaxis: {
+                                domain: [0, 0.85],
+                                showgrid: false,
+                                zeroline: false
+                              },
+                              yaxis: {
+                                domain: [0, 0.85],
+                                showgrid: false,
+                                zeroline: false
+                              },
+                              xaxis2: {
+                                domain: [0.85, 1],
+                                showgrid: false,
+                                zeroline: false
+                              },
+                              yaxis2: {
+                                domain: [0.85, 1],
+                                showgrid: false,
+                                zeroline: false
+                              }
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -173,13 +191,16 @@ class Home extends Component<Props> {
 }
 
 const mapStateToProps = state => {
+  console.log(state.service)
   return {
-    isLoading: state.service ? state.service.isLoading : ""
+    isLoading: state.service ? state.service.isLoading : "",
+    tempData: (state.service.initialData) ? state.service.initialData : ""
   };
 };
 
 export default connect(mapStateToProps, {
-  setLoader
+  setLoader,
+  getInitialData
 })(
   reduxForm({
     form: "accountForm",
