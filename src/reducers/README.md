@@ -1,0 +1,1 @@
+This folder is a place to define reducer (The reducer is a pure function that takes the previous state and an action, and returns the next state) files which will be used to manage states across the applications.

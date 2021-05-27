@@ -1,0 +1,1 @@
+This folder is a place to define all types(types.js) of redux functionality which will be used in state management across the applications. And also have to manage all api functionality of redux system in index.js file.
