@@ -1,3 +1,3 @@
 export const SET_LOADER = "SET_LOADER";
-export const LOAD = 'LOAD';
+export const MONTHLY_PAYMENT = 'MONTHLY_PAYMENT';
 export const INITIALDATA = "INITIALDATA";

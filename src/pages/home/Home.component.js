@@ -7,7 +7,7 @@ import { Field, reduxForm } from "redux-form";
 import { required } from "../../constants/validation";
 
 import { Nav, Footer, LoaderScreen } from "../includes";
-import { setLoader, getInitialData } from "../../actions";
+import { setLoader, getInitialData, monthlyPaymentData } from "../../actions";
 import Plot from 'react-plotly.js';
 
 
@@ -17,29 +17,36 @@ class Home extends Component<Props> {
     super(props);
     this.state = {
       twoDimData: '',
-      monthly_payment: localStorage.getItem('monthly_payment')
+      monthly_payment: this.props.monthlyPayment || '',
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
     this.props.setLoader(false);
+
+    this.props.getInitialData(this.props.tempData, '')
+
   }
 
   handleChange(e) {
     this.setState({
       monthly_payment: e.target.value
     })
-    localStorage.setItem('monthly_payment', e.target.value)
+    let month_payment_amount = e.target.value
+    this.props.monthlyPaymentData(month_payment_amount).then(res => {
+
+    })
   }
 
   onSubmit = formValue => {
-    var a = [];
-    a = JSON.parse(localStorage.getItem('userData')) || [];
-    a.push(formValue.balance);
-    localStorage.setItem('userData', JSON.stringify(a));
-    this.props.reset('accountForm');
-    // this.props.getInitialData(this.props.tempData, "");
+    if (formValue.balance != undefined && formValue.balance != '') {
+      let balanceArray = this.props.tempData || []
+      balanceArray.push(formValue.balance);
+      this.props.getInitialData(balanceArray).then(res => {
+        this.props.reset('accountForm');
+      })
+    }
   }
 
   render() {
@@ -48,7 +55,7 @@ class Home extends Component<Props> {
     }
 
     var getBalnace = [];
-    getBalnace = JSON.parse(localStorage.getItem('userData')) || [];
+    getBalnace = this.props.tempData || [];
 
     let numberBal = []
     numberBal =
@@ -127,7 +134,7 @@ class Home extends Component<Props> {
                               <div className="row justify-content-center">
                                 <div className="col-md-8">
                                   <label className="balnace">Balance:</label>
-                                  <Field name="balance" type="text" id="balance" placeholder={`Balance`} component={renderInput} onChange={this.handleChange} validate={required} />
+                                  <Field name="balance" type="text" id="balance" placeholder={`Balance`} component={renderInput} onChange={this.handleChange} validate={this.props.tempData && this.props.tempData.length == 0 ? required : ''} />
                                 </div>
 
                                 <div className="col-md-4 pt-4">
@@ -138,7 +145,7 @@ class Home extends Component<Props> {
                           </div>
 
                           <div className="pb-3 pt-3"><h3 className="card-h2">Balance of accounts after a number of months</h3></div>
-                          <Plot
+                          {this.props.tempData && this.props.tempData.length != 0 ? <Plot
                             data={data}
                             style={{ width: '100%', height: '100%' }}
                             useResizeHandler
@@ -169,7 +176,8 @@ class Home extends Component<Props> {
                                 zeroline: false
                               }
                             }}
-                          />
+                          /> : ''}
+
                         </div>
                       </div>
                     </div>
@@ -191,16 +199,17 @@ class Home extends Component<Props> {
 }
 
 const mapStateToProps = state => {
-  console.log(state.service)
   return {
     isLoading: state.service ? state.service.isLoading : "",
-    tempData: (state.service.initialData) ? state.service.initialData : ""
+    tempData: (state.service.initialData) ? state.service.initialData : "",
+    monthlyPayment: state.service.monthlyPaymentResponse ? state.service.monthlyPaymentResponse : ''
   };
 };
 
 export default connect(mapStateToProps, {
   setLoader,
-  getInitialData
+  getInitialData,
+  monthlyPaymentData
 })(
   reduxForm({
     form: "accountForm",

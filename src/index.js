@@ -13,7 +13,7 @@ import reducers from "./reducers";
 function saveToLocalStorage (state) {
     try {
         const serializedState = JSON.stringify(state);
-      //  localStorage.setItem('state', serializedState);
+        localStorage.setItem('state', serializedState);
     } catch (e) {
         return e;
     }
